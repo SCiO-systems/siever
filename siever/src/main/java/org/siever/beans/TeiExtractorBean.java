@@ -7,6 +7,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.util.json.JsonObject;
 import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
+import org.siever.models.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -28,7 +30,10 @@ import org.xml.sax.SAXException;
 public class TeiExtractorBean {
     public void extractTei (Exchange exchange) throws Exception {
 
-        String pdfPath = exchange.getIn().getBody(String.class);
+        String pdfPath = exchange.getIn().getHeader("pdfPath", String.class);
+        InputJob inputj = new InputJob();
+        inputj = exchange.getIn().getBody(InputJob.class);
+        System.out.println(inputj.toString());
         Engine engine = exchange.getContext().getRegistry()
                 .lookupByNameAndType("engine", Engine.class);
         File input = new File(pdfPath);
@@ -39,18 +44,23 @@ public class TeiExtractorBean {
 
         GrobidAnalysisConfig conf = GrobidAnalysisConfig.builder().build();
 
+        UUID uuid = UUID.randomUUID();
+
         String tei = engine.fullTextToTEI(input, conf);
-        JSONObject json = teiToJson(tei);
-        json.put("pageCount", count);
+        Result result = new Result();
+        result = teiToResult(tei);
+        result.setMetadata(inputj);
+        result.setPageCount(count);
+        result.setSieverID(uuid.toString());
 
-        System.out.println(json);
+        System.out.println(result.toString());
 
-        exchange.getIn().setBody(json, JSONObject.class);
+        exchange.getIn().setBody(result, Result.class);
 
     }
 
-    private JSONObject teiToJson (String tei) throws ParserConfigurationException, IOException, SAXException {
-        JSONObject json = new JSONObject();
+    private Result teiToResult (String tei) throws ParserConfigurationException, IOException, SAXException {
+        Result result = new Result();
 
         Element rootElement = documentInitializeParser(tei);
         NodeList HeaderList = rootElement.getElementsByTagName("teiHeader");
@@ -58,14 +68,13 @@ public class TeiExtractorBean {
 
         Element body = (Element) rootElement.getElementsByTagName("body").item(0);
 
-        json.put("title", getTitle(headitem));
-        json.put("abstract", getAbstract(headitem));
-        json.put("keywords", getKeywords(headitem));
-        json.put("chapters", getChapters(body));
-        json.put("figures", getFigures(body));
+        result.setTitle(getTitle(headitem));
+        result.setAbstrct(getAbstract(headitem));
+        result.setKeywords(getKeywords(headitem));
+        result.setChapters(getChapters(body));
+        result.setFigures(getFigures(body));
 
-//        System.out.println(json);
-        return json;
+        return result;
     }
 
     private Element documentInitializeParser (String tei) throws ParserConfigurationException, IOException, SAXException {
@@ -81,7 +90,6 @@ public class TeiExtractorBean {
         Element item = (Element) list.item(0);
         NodeList titleNode = item.getElementsByTagName("title");
         String title = titleNode.item(0).getTextContent();
-//        System.out.println("title : " + title);
         return title;
     }
 
@@ -104,7 +112,6 @@ public class TeiExtractorBean {
                 }
             }
         }
-//        System.out.println("abstract : " + abstr);
         return abstr;
     }
 
@@ -116,12 +123,11 @@ public class TeiExtractorBean {
             Element term = (Element) terms.item(i);
             keywords.add(term.getTextContent());
         }
-//        System.out.println("keywords : " + keywords);
         return keywords;
     }
 
-    private JSONArray getChapters (Element body) {
-        JSONArray chapters = new JSONArray();
+    private ArrayList<Chapter> getChapters (Element body) {
+        ArrayList<Chapter> chapters = new ArrayList<Chapter>();
         NodeList chaps = body.getElementsByTagName("div");
         int numberOfChapters = chaps.getLength();
 
@@ -134,11 +140,12 @@ public class TeiExtractorBean {
         return chapters;
     }
 
-    private JSONObject getChapter(int index, Element chapter) {
-        JSONObject chap = new JSONObject();
-        chap.put("index", index);
-        chap.put("head", getChapterHead(chapter));
-        chap.put("paragraphs", getChapterParagraphs(chapter));
+    private Chapter getChapter(int index, Element chapter) {
+        Chapter chap = new Chapter();
+        chap.setHead(getChapterHead(chapter));
+        chap.setIndex(index);
+        chap.setParagraphs(getChapterParagraphs(chapter));
+
         return chap;
     }
 
@@ -151,8 +158,8 @@ public class TeiExtractorBean {
         return headStr;
     }
 
-    private JSONArray getChapterParagraphs(Element chapter) {
-        JSONArray pars = new JSONArray();
+    private ArrayList<Paragraph> getChapterParagraphs(Element chapter) {
+        ArrayList<Paragraph> pars = new ArrayList<Paragraph>();
         NodeList paragraphs = chapter.getElementsByTagName("p");
         int numberOfParagraphs = paragraphs.getLength();
 
@@ -164,24 +171,24 @@ public class TeiExtractorBean {
         return pars;
     }
 
-    private JSONObject getParagraph(int index, Element paragraph) {
-        JSONObject par = new JSONObject();
+    private Paragraph getParagraph(int index, Element paragraph) {
+        Paragraph par = new Paragraph();
 
-        par.put("index", index);
+        par.setIndex(index);
 
         String paragraphStr = paragraph.getTextContent();
-        par.put("text", paragraphStr);
+        par.setText(paragraphStr);
 
         StringTokenizer st = new StringTokenizer(paragraphStr);
         int wordCount = st.countTokens();
-        par.put("size", wordCount);
+        par.setSize(wordCount);
 
         return par;
     }
 
-    private JSONArray getFigures(Element body) {
+    private ArrayList<Figure> getFigures(Element body) {
 
-        JSONArray figures = new JSONArray();
+        ArrayList<Figure> figures = new ArrayList<Figure>();
 
         NodeList figs = body.getElementsByTagName("figure");
         int figuresCount = figs.getLength();
@@ -192,9 +199,9 @@ public class TeiExtractorBean {
         return figures;
     }
 
-    private JSONObject getFigure(int index, NodeList figures) {
+    private Figure getFigure(int index, NodeList figures) {
 
-        JSONObject fig = new JSONObject();
+        Figure fig = new Figure();
 
         String txt = "";
         Element figure = (Element) figures.item(index);
@@ -202,7 +209,7 @@ public class TeiExtractorBean {
         txt += getFigureDesc(figure);
         txt += getFiguresTables(figure);
 
-        fig.put("text", txt);
+        fig.setText(txt);
         return fig;
     }
 

@@ -16,7 +16,6 @@ import org.siever.routes.SieveRouter;
 
 import java.util.Arrays;
 
-
 public class Siever extends Main {
 
     private static final Logger logger = LogManager.getLogger("org.siever.server");
@@ -51,7 +50,7 @@ public class Siever extends Main {
             camelContext.addRoutes(new SieveRouter());
             camelContext.start();
             ProducerTemplate template = camelContext.createProducerTemplate();
-            template.sendBody("direct:sieve", message);
+//            template.sendBody("direct:sieve", message);
             siever.run();
             // ((DefaultCamelContext) camelContext).startAllRoutes();
         } catch (Exception e) {
@@ -59,6 +58,5 @@ public class Siever extends Main {
         }
 
     }
-
 
 }
