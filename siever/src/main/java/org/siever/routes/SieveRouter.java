@@ -1,10 +1,7 @@
 package org.siever.routes;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.Expression;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.aws2.s3.AWS2S3Constants;
 import org.apache.camel.component.kafka.KafkaConstants;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.siever.beans.TeiExtractorBean;
@@ -16,15 +13,27 @@ public class SieveRouter extends RouteBuilder {
 
     public void configure() throws Exception {
 
-        from("kafka:test_siever_topic?brokers=kafka.scio.services:9092")
+        from("kafka:{{KAFKA_INPUT_TOPIC}}?brokers={{KAFKA_BROKER}}")
                 .routeId("kafka_consumer")
                 .unmarshal().json(JsonLibrary.Jackson, InputJob.class)
                 .bean(UrlDownloaderBean.class, "pdfPath")
                 .bean(TeiExtractorBean.class, "extractTei")
-                .setHeader(KafkaConstants.KEY, simple("${in.body.sieverID}"))
-                .marshal().json(JsonLibrary.Jackson, Result.class)
+                .removeHeader("pdfPath")
 //                .log("${in.body}")
-                .to("kafka:test_siever_results?brokers=kafka.scio.services:9092");
+                .setHeader(AWS2S3Constants.KEY,
+                        simple("${in.body.sieverID}.json"))
+                .marshal().json(JsonLibrary.Jackson, Result.class)
+                .toD("aws2-s3://{{AWS_BUCKET}}?" +
+                        "accessKey=RAW({{AWS_S3_ACCESS_KEY}})&" +
+                        "secretKey=RAW({{AWS_S3_SECRET_KEY}})&" +
+                        "region={{AWS_REGION}}&" +
+                        "deleteAfterWrite=false&" +
+                        "deleteAfterRead=false")
+                .unmarshal().json(JsonLibrary.Jackson, Result.class)
+                .setHeader(KafkaConstants.KEY, simple("${in.body.sieverID}"))
+                .setBody(simple("${in.body.sieverID}"))
+                .marshal().json(JsonLibrary.Jackson)
+                .to("kafka:{{KAFKA_OUTPUT_TOPIC}}?brokers={{KAFKA_BROKER}}");
     }
 
 }
