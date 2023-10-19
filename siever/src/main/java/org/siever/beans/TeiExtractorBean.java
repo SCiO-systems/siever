@@ -1,10 +1,6 @@
 package org.siever.beans;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.camel.Exchange;
-import org.apache.camel.util.json.JsonObject;
 import org.grobid.core.engines.Engine;
 import org.grobid.core.engines.config.GrobidAnalysisConfig;
 import org.siever.models.*;
@@ -33,7 +29,7 @@ public class TeiExtractorBean {
         String pdfPath = exchange.getIn().getHeader("pdfPath", String.class);
         InputJob inputj = new InputJob();
         inputj = exchange.getIn().getBody(InputJob.class);
-        System.out.println(inputj.toString());
+//        System.out.println(inputj.toString());
         Engine engine = exchange.getContext().getRegistry()
                 .lookupByNameAndType("engine", Engine.class);
         File input = new File(pdfPath);
@@ -47,13 +43,12 @@ public class TeiExtractorBean {
         UUID uuid = UUID.randomUUID();
 
         String tei = engine.fullTextToTEI(input, conf);
-        Result result = new Result();
-        result = teiToResult(tei);
+        Result result = teiToResult(tei);
         result.setMetadata(inputj);
         result.setPageCount(count);
         result.setSieverID(uuid.toString());
 
-        System.out.println(result.toString());
+//        System.out.println(result.toString());
 
         exchange.getIn().setBody(result, Result.class);
 

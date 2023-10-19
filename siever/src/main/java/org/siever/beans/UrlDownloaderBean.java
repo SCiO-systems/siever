@@ -11,6 +11,7 @@ public class UrlDownloaderBean {
         InputJob input = new InputJob();
         input = exchange.getIn().getBody(InputJob.class);
         String url = input.getUrl();
+        String fileName = input.getId() + ".pdf";
 //        System.out.println(url);
 
         Engine engine = exchange.getContext().getRegistry()
@@ -19,24 +20,16 @@ public class UrlDownloaderBean {
         String dest = exchange.getContext().getRegistry()
                 .lookupByNameAndType("destination", String.class);
 
-        engine.downloadPDF(url, dest, "example.pdf");
+        engine.downloadPDF(url, dest, fileName);
 
-        String pdfPath = dest + "/downloaded.pdf";
+        String pdfPath = dest + "/" + fileName;
 
-        System.out.println(pdfPath);
-
-        pdfPath = "/home/anastasis/Desktop/Muscle_hypertrophy.pdf";
+        //remove the following line in order to use the dowloaded pdf as an input for the siever
+//        pdfPath = "/home/anastasis/Desktop/Muscle_hypertrophy.pdf";
 
         exchange.getIn().setHeader("pdfPath", pdfPath);
         exchange.getIn().setBody(input, InputJob.class);
 
     }
-
-//    public String printTest (Exchange exchange) {
-//        InputJob input = new InputJob();
-//        input = exchange.getIn().getBody(InputJob.class);
-//        System.out.println(input.toString() );
-//        return input.toString();
-//    }
 
 }

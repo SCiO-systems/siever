@@ -1,4 +1,5 @@
 package org.siever.models;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.siever.models.InputJob;
 import org.siever.models.Figure;
 import org.siever.models.Chapter;
@@ -56,6 +57,7 @@ public class Result {
         this.title = title;
     }
 
+    @JsonProperty("abstract")
     public String getAbstrct() {
         return abstrct;
     }
@@ -66,18 +68,6 @@ public class Result {
 
     public InputJob getMetadata(){
         return metadata;
-    }
-
-    public String getId() {
-        return this.metadata.getId();
-    }
-
-    public String getSource() {
-        return this.metadata.getSource();
-    }
-
-    public String getUrl() {
-        return this.metadata.getUrl();
     }
 
     public void setMetadata(InputJob metadata) {
