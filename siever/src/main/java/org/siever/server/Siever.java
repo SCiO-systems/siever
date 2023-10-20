@@ -27,8 +27,6 @@ public class Siever extends Main {
         PropertiesComponent properties = camelContext.getPropertiesComponent();
         properties.setLocation("classpath:/env.properties");
 
-        logger.error("test logger");
-
         DefaultRegistry registry = (DefaultRegistry) camelContext.getRegistry();
         ((org.apache.camel.impl.DefaultCamelContext) camelContext).setRegistry(registry);
 
@@ -36,7 +34,7 @@ public class Siever extends Main {
         registry.bind("destination", destPath);
 
         String pGrobidHome = properties.loadPropertiesAsMap().get("GROBID_HOME_PATH").toString();
-        logger.error(pGrobidHome);
+//        logger.error(pGrobidHome);
         GrobidHomeFinder grobidHomeFinder = new GrobidHomeFinder(Arrays.asList(pGrobidHome));
         GrobidProperties.getInstance(grobidHomeFinder);
 
@@ -44,13 +42,10 @@ public class Siever extends Main {
         Engine engine = GrobidFactory.getInstance().createEngine();
         registry.bind("engine", engine);
 
-        String message = "https://cgi.di.uoa.gr/~izambo/K10Java.pdf";
-
         try {
             camelContext.addRoutes(new SieveRouter());
             camelContext.start();
             ProducerTemplate template = camelContext.createProducerTemplate();
-//            template.sendBody("direct:sieve", message);
             siever.run();
             // ((DefaultCamelContext) camelContext).startAllRoutes();
         } catch (Exception e) {
