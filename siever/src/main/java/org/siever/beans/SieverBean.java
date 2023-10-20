@@ -23,13 +23,18 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.xml.sax.SAXException;
 
-public class TeiExtractorBean {
-    public void extractTei (Exchange exchange) throws Exception {
+public class SieverBean {
+
+    public void sieve (Exchange exchange) throws Exception {
+        DownloadPdf(exchange);
+        extractTei(exchange);
+        exchange.getIn().removeHeader("pdfPath");
+    }
+
+    private void extractTei (Exchange exchange) throws Exception {
 
         String pdfPath = exchange.getIn().getHeader("pdfPath", String.class);
-        InputJob inputj = new InputJob();
-        inputj = exchange.getIn().getBody(InputJob.class);
-//        System.out.println(inputj.toString());
+        InputJob inputj = exchange.getIn().getBody(InputJob.class);
         Engine engine = exchange.getContext().getRegistry()
                 .lookupByNameAndType("engine", Engine.class);
         File input = new File(pdfPath);
@@ -48,10 +53,40 @@ public class TeiExtractorBean {
         result.setPageCount(count);
         result.setSieverID(uuid.toString());
 
-//        System.out.println(result.toString());
-
         exchange.getIn().setBody(result, Result.class);
 
+    }
+
+    private void DownloadPdf (Exchange exchange) {
+
+        InputJob input = exchange.getIn().getBody(InputJob.class);
+        String url = input.getUrl();
+        String fileName = input.getId() + ".pdf";
+
+        Engine engine = exchange.getContext().getRegistry()
+                .lookupByNameAndType("engine",Engine.class);
+
+        String dest = exchange.getContext().getRegistry()
+                .lookupByNameAndType("destination", String.class);
+
+        engine.downloadPDF(url, dest, fileName);
+
+        String pdfPath = dest + "/" + fileName;
+
+        //remove the following line in order to use the dowloaded pdf as an input for the siever
+//        pdfPath = "/home/anastasis/Desktop/Muscle_hypertrophy.pdf";
+
+        exchange.getIn().setHeader("pdfPath", pdfPath);
+        exchange.getIn().setBody(input, InputJob.class);
+
+    }
+
+    public void outputMessage(Exchange exchange) {
+        Result result = exchange.getIn().getBody(Result.class);
+        String sieverID = result.getSieverID();
+        OutputJob output = new OutputJob();
+        output.setSieverID(sieverID);
+        exchange.getIn().setBody(output, OutputJob.class);
     }
 
     private Result teiToResult (String tei) throws ParserConfigurationException, IOException, SAXException {
