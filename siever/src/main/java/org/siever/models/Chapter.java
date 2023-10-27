@@ -8,6 +8,10 @@ public class Chapter {
     private int index;
     private ArrayList<Paragraph> paragraphs;
 
+    public Chapter() {
+        this.paragraphs = new ArrayList<Paragraph>();
+    }
+
     public int getIndex() {
         return index;
     }
@@ -44,7 +48,7 @@ public class Chapter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Chapter that = (Chapter) o;
-        return Objects.equals(getIndex(), that.getIndex()) && Objects.equals(getHead(), that.getHead()) && Objects.equals(getParagraphs(), that.getParagraphs());
+        return Objects.equals(getIndex(), that.getIndex()) && Objects.equals(getHead(), that.getHead()) && getParagraphs().equals(that.getParagraphs());
     }
 
     @Override

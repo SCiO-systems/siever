@@ -19,7 +19,7 @@ public class OutputJob {
 
     @Override
     public String toString() {
-        return super.toString();
+        return "OutputJob{sieverID='" + sieverID + "'}";
     }
 
     @Override
