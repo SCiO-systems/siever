@@ -27,9 +27,9 @@ public class Result {
         this.figures = new ArrayList<Figure>();
     }
 
-    public Result(String id, String source, String url) {
-        this.metadata = new InputJob(id, source, url);
-    }
+//    public Result(String id, String source, String url) {
+//        this.metadata = new InputJob(id, source, url);
+//    }
 
     public Result(InputJob metadata, int pageCount, String title, String abstrct, ArrayList<String> keywords, ArrayList<Chapter> chapters, ArrayList<Figure> figures, String sieverID) {
         this.metadata = new InputJob(metadata.getId(), metadata.getSource(), metadata.getUrl());
