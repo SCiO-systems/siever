@@ -28,6 +28,7 @@ public class SieverBean {
     public void sieve (Exchange exchange) throws Exception {
         DownloadPdf(exchange);
         extractTei(exchange);
+        deletePdf(exchange.getIn().getHeader("pdfPath", String.class));
         exchange.getIn().removeHeader("pdfPath");
     }
 
@@ -72,6 +73,7 @@ public class SieverBean {
         engine.downloadPDF(url, dest, fileName);
 
         String pdfPath = dest + "/" + fileName;
+        System.out.println(pdfPath);
 
         //remove the following line in order to use the dowloaded pdf as an input for the siever
 //        pdfPath = "/home/anastasis/Desktop/Muscle_hypertrophy.pdf";
@@ -79,6 +81,11 @@ public class SieverBean {
         exchange.getIn().setHeader("pdfPath", pdfPath);
         exchange.getIn().setBody(input, InputJob.class);
 
+    }
+
+    private void deletePdf (String path){
+            File f = new File(path);
+            f.delete();
     }
 
     public void outputMessage(Exchange exchange) {

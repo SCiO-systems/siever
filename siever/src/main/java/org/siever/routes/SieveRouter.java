@@ -15,6 +15,7 @@ public class SieveRouter extends RouteBuilder {
 
         from("kafka:{{KAFKA_INPUT_TOPIC}}?brokers={{KAFKA_BROKER}}")
                 .routeId("kafka_consumer")
+                .log("Edw exoume111 ${in.body}")
                 .unmarshal().json(JsonLibrary.Jackson, InputJob.class)
                 .bean(SieverBean.class, "sieve")
 //                .log("${in.body}")

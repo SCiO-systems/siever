@@ -91,7 +91,7 @@ class SieverBeanTest {
     }
 
     @Test
-    void sievePDFGetsDownloaded() throws Exception {
+    void sievePDFDeleted() throws Exception {
         InputJob input = Instancio.create(InputJob.class);
         input.setUrl("https://www.sfu.ca/~wainwrig/Econ400/documents/460-TERM-PAPER-EXAMPLE.pdf");
 
@@ -101,16 +101,34 @@ class SieverBeanTest {
         SieverBean sieverBean = new SieverBean();
         sieverBean.sieve(ex);
 
-        String dest = ex.getContext().getRegistry()
-                .lookupByNameAndType("destination", String.class);
-
-        String fileName = input.getId() + ".pdf";
-
-        String pdfPath = dest + "/" + fileName;
+        String pdfPath = "/home/anastasis/Desktop/downloadedpdfs";
+        pdfPath = pdfPath + input.getId() + ".pdf";
 
         File f = new File(pdfPath);
-        assertEquals(f.exists(), true);
+        assertFalse(f.exists());
     }
+
+//    @Test
+//    void sievePDFGetsDownloaded() throws Exception {
+//        InputJob input = Instancio.create(InputJob.class);
+//        input.setUrl("https://www.sfu.ca/~wainwrig/Econ400/documents/460-TERM-PAPER-EXAMPLE.pdf");
+//
+//        Exchange ex = setUpTheTestEnv();
+//        ex.getIn().setBody(input, InputJob.class);
+//
+//        SieverBean sieverBean = new SieverBean();
+//        sieverBean.sieve(ex);
+//
+//        String dest = ex.getContext().getRegistry()
+//                .lookupByNameAndType("destination", String.class);
+//
+//        String fileName = input.getId() + ".pdf";
+//
+//        String pdfPath = dest + "/" + fileName;
+//
+//        File f = new File(pdfPath);
+//        assertEquals(f.exists(), true);
+//    }
 
     @Test
     public void outPutMessageBodyTest () throws Exception {
