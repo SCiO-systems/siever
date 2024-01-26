@@ -8,14 +8,21 @@ import org.siever.beans.SieverBean;
 import org.siever.models.InputJob;
 import org.siever.models.OutputJob;
 import org.siever.models.Result;
+import org.siever.processors.ExceptionHandler;
 
 public class SieveRouter extends RouteBuilder {
 
     public void configure() throws Exception {
 
+        onException(Exception.class)
+                .handled(true)
+                .process(new ExceptionHandler())
+                .marshal().json()
+                .to("file:///home/anastasis/Desktop/sieverErrors/");
+
+
         from("kafka:{{KAFKA_INPUT_TOPIC}}?brokers={{KAFKA_BROKER}}")
                 .routeId("kafka_consumer")
-                .log("Edw exoume111 ${in.body}")
                 .unmarshal().json(JsonLibrary.Jackson, InputJob.class)
                 .bean(SieverBean.class, "sieve")
 //                .log("${in.body}")

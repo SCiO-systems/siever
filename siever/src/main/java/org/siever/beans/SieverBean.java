@@ -39,16 +39,33 @@ public class SieverBean {
         Engine engine = exchange.getContext().getRegistry()
                 .lookupByNameAndType("engine", Engine.class);
         File input = new File(pdfPath);
+        UUID uuid = UUID.randomUUID();
+        int count = 0;
 
-        PDDocument doc = Loader.loadPDF(input);
-        int count = doc.getNumberOfPages();
-        doc.close();
+//        try {
+            PDDocument doc = Loader.loadPDF(input);
+            count = doc.getNumberOfPages();
+            doc.close();
+
+//        }catch (Exception ee) {
+//            System.out.println("Error while loading pdf");
+//            Result result = new Result();
+//            exchange.getIn().setBody(result, Result.class);
+//            return;
+//        }
 
         GrobidAnalysisConfig conf = GrobidAnalysisConfig.builder().build();
 
-        UUID uuid = UUID.randomUUID();
+        String tei;
+//        try{
+            tei = engine.fullTextToTEI(input, conf);
+//        }catch (Exception ee) {
+//            System.out.println("pdf to xml conversion failed");
+//            Result result = new Result();
+//            exchange.getIn().setBody(result, Result.class);
+//            return;
+//        }
 
-        String tei = engine.fullTextToTEI(input, conf);
         Result result = teiToResult(tei);
         result.setMetadata(inputj);
         result.setPageCount(count);
@@ -70,10 +87,17 @@ public class SieverBean {
         String dest = exchange.getContext().getRegistry()
                 .lookupByNameAndType("destination", String.class);
 
-        engine.downloadPDF(url, dest, fileName);
+//        try{
+            engine.downloadPDF(url, dest, fileName);
+//        }catch (Exception e) {
+//            System.out.println("Problem during grobid. Unable to download pdf with url: " + url);
+//            System.out.println(e.getMessage());
+//            exchange.getIn().setHeader("pdfPath", "empty");
+//            return;
+//        }
 
         String pdfPath = dest + "/" + fileName;
-        System.out.println(pdfPath);
+//        System.out.println(pdfPath);
 
         //remove the following line in order to use the dowloaded pdf as an input for the siever
 //        pdfPath = "/home/anastasis/Desktop/Muscle_hypertrophy.pdf";
