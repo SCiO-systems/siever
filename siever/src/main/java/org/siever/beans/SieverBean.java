@@ -75,7 +75,7 @@ public class SieverBean {
 
     }
 
-    private void DownloadPdf (Exchange exchange) {
+    private void DownloadPdf (Exchange exchange) throws Exception {
 
         InputJob input = exchange.getIn().getBody(InputJob.class);
         String url = input.getUrl();
@@ -97,26 +97,22 @@ public class SieverBean {
 //        }
 
         String pdfPath = dest + "/" + fileName;
-//        System.out.println(pdfPath);
-
-        //remove the following line in order to use the dowloaded pdf as an input for the siever
-//        pdfPath = "/home/anastasis/Desktop/Muscle_hypertrophy.pdf";
 
         exchange.getIn().setHeader("pdfPath", pdfPath);
         exchange.getIn().setBody(input, InputJob.class);
 
     }
 
-    private void deletePdf (String path){
+    private void deletePdf (String path) throws Exception{
             File f = new File(path);
             f.delete();
     }
 
-    public void outputMessage(Exchange exchange) {
+    public void outputMessage(Exchange exchange) throws Exception{
         Result result = exchange.getIn().getBody(Result.class);
-        String sieverID = result.getSieverID();
+        String S3FileName = result.getMetadata().getId();
         OutputJob output = new OutputJob();
-        output.setSieverID(sieverID);
+        output.setS3FileName(S3FileName);
         exchange.getIn().setBody(output, OutputJob.class);
     }
 

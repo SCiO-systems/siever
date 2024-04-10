@@ -142,13 +142,13 @@ class SieverBeanTest {
         sieverBean.sieve(ex);
 
         OutputJob outBody = new OutputJob();
-        String sieverID = ex.getIn().getBody(Result.class).getSieverID();
-        outBody.setSieverID(sieverID);
+        String S3FileName = ex.getIn().getBody(Result.class).getMetadata().getId();
+        outBody.setS3FileName(S3FileName);
 
         sieverBean.outputMessage(ex);
-        String retbody = ex.getIn().getBody(OutputJob.class).getSieverID();
+        String retbody = ex.getIn().getBody(OutputJob.class).getS3FileName();
 
-        assertEquals(retbody, outBody.getSieverID());
+        assertEquals(retbody, outBody.getS3FileName());
     }
 
 

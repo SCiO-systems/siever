@@ -4,22 +4,22 @@ import java.util.Objects;
 
 public class OutputJob {
 
-    private String sieverID;
+    private String S3FileName;
 
     public OutputJob() {
     }
 
-    public String getSieverID() {
-        return sieverID;
+    public String getS3FileName() {
+        return S3FileName;
     }
 
-    public void setSieverID(String sieverID) {
-        this.sieverID = sieverID;
+    public void setS3FileName(String S3FileName) {
+        this.S3FileName = S3FileName;
     }
 
     @Override
     public String toString() {
-        return "OutputJob{sieverID='" + sieverID + "'}";
+        return "OutputJob{S3FileName='" + S3FileName + "'}";
     }
 
     @Override
@@ -27,11 +27,11 @@ public class OutputJob {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OutputJob outputJob = (OutputJob) o;
-        return Objects.equals(sieverID, outputJob.sieverID);
+        return Objects.equals(S3FileName, outputJob.S3FileName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sieverID);
+        return Objects.hash(S3FileName);
     }
 }

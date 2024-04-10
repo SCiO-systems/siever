@@ -13,24 +13,24 @@ class OutputJobTest {
     public void testDefaultConstructor() {
         OutputJob out = new OutputJob();
         assertEquals(OutputJob.class, out.getClass());
-        assertEquals(null, out.getSieverID());
+        assertEquals(null, out.getS3FileName());
     }
 
     @Test
     public void testSetAndGetSieverId() {
         OutputJob out = new OutputJob();
         String sample = Instancio.create(String.class);
-        out.setSieverID(sample);
-        assertEquals(sample, out.getSieverID());
+        out.setS3FileName(sample);
+        assertEquals(sample, out.getS3FileName());
     }
 
     @Test
     public void testEqualsForEquality() {
         String sample = Instancio.create(String.class);
         OutputJob out1 = new OutputJob();
-        out1.setSieverID(sample);
+        out1.setS3FileName(sample);
         OutputJob out2 = new OutputJob();
-        out2.setSieverID(sample);
+        out2.setS3FileName(sample);
         assertTrue(out1.equals(out2));
     }
 
@@ -44,15 +44,15 @@ class OutputJobTest {
     @Test
     public void testToString() {
         OutputJob out = Instancio.create(OutputJob.class);
-        String txt = out.getSieverID();
-        String expected = "OutputJob{sieverID='" + txt + "'}";
+        String txt = out.getS3FileName();
+        String expected = "OutputJob{S3FileName='" + txt + "'}";
         assertEquals(expected, out.toString());
     }
 
     @Test
     public void testHashCode() {
         OutputJob out = Instancio.create(OutputJob.class);
-        String txt = out.getSieverID();
+        String txt = out.getS3FileName();
         int expectedHashCode = Objects.hash(txt);
         assertEquals(expectedHashCode, out.hashCode());
     }
